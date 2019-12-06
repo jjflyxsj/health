@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.PermissionDao">
+
+
+    <select id="findByRoleId" resultType="com.itheima.pojo.Permission" parameterType="int" >
+        select p.* from t_permission p,t_role_permission r where p.id=r.permission_id and  r.role_id=#{roleId}
+    </select>
+
+
+    <select id="findAll" resultType="com.itheima.pojo.Permission">
+        select * from t_permission
+    </select>
+
+    <resultMap id="findPermissions" type="com.itheima.pojo.Permission">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="keyword" property="keyword"/>
+        <result column="description" property="description"/>
+    </resultMap>
+    <select id="findPermissionsByRoleId" parameterType="int" resultMap="findPermissions">
+        SELECT p.* FROM t_permission p,t_role_permission WHERE p.`id`=t_role_permission.`permission_id` AND t_role_permission.`role_id`=#{id};
+
+    </select>
+    <select id="total" resultType="java.lang.Integer">
+        select count(1) from t_permission
+    </select>
+
+
+    <select id="findAllByQueryString" resultMap="findPermissions" parameterType="com.itheima.entity.QueryPageBean">
+        select * from t_permission where 1=1
+        <if test="queryString != null" >
+            and id=#{queryString} or name=#{queryString} or keyword=#{queryString}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.itheima.pojo.Permission">
+        insert into t_permission value(null,#{name},#{keyword},#{description})
+    </insert>
+    <update id="edit" parameterType="com.itheima.pojo.Permission">
+        update t_permission set name=#{name} ,keyword=#{keyword} ,description=#{description} where id=#{id}
+    </update>
+    <delete id="delete" parameterType="int">
+        delete from t_permission where id=#{id}
+    </delete>
+</mapper>

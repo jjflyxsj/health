@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.RoleDao">
+
+    <select id="findByUserId" resultType="com.itheima.pojo.Role" parameterType="int">
+        select r.* from t_role r,t_user_role u where r.id=u.role_id and u.user_id=#{userId}
+    </select>
+    <select id="findAll" resultType="com.itheima.pojo.Role">
+        select * from t_role
+    </select>
+    <resultMap id="RoleMap" type="com.itheima.pojo.Role" >
+        <id property="id" column="id"></id>
+        <result column="name" property="name"/>
+        <result column="keyword" property="keyword"/>
+        <result column="description" property="description"/>
+        <collection property="menus"
+                    ofType="com.itheima.pojo.Menu"
+                    column="id"
+                    select="com.itheima.dao.MenuDao.findByRoleId">
+        </collection>
+        <collection property="permissions"
+                    ofType="com.itheima.pojo.Permission"
+                    column="id"
+                    select="com.itheima.dao.PermissionDao.findByRoleId">
+        </collection>
+    </resultMap>
+
+    <select id="findById" parameterType="int" resultMap="RoleMap">
+        select * from t_role where id=#{id}
+    </select>
+
+    <delete id="delete" parameterType="int">
+        delete from t_role where id=#{id}
+    </delete>
+
+    <insert id="add" parameterType="com.itheima.pojo.Role">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_role (name,keyword,description)
+        values (#{name},#{keyword},#{description})
+    </insert>
+
+    <insert id="setRoleAndMenu" parameterType="map">
+        INSERT INTO t_role_menu (role_id,menu_id)
+        VALUES
+        (#{roleId},#{menuId})
+    </insert>
+
+    <insert id="setRoleAndPermission" parameterType="map">
+        INSERT INTO t_role_permission (role_id,permission_id)
+        VALUES
+        (#{roleId},#{permissionid})
+    </insert>
+    <update id="edit" parameterType="com.itheima.pojo.Role">
+        update t_role
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="keyword != null">
+                keyword=#{keyword},
+            </if>
+            <if test="description != null">
+                description=#{description}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRoleAndMenu" parameterType="int">
+        delete from t_role_menu where role_id=#{id}
+    </delete>
+
+    <delete id="deleteRoleAndPermission" parameterType="int">
+        delete from t_role_permission where role_id=#{id}
+    </delete>
+
+    <select id="findMenuIdsByRoleId" parameterType="int" resultType="int">
+        select menu_id from t_role_menu where role_id=#{roleId}
+    </select>
+
+    <select id="findPermissionIdsByRoleId" parameterType="int" resultType="int">
+        select permission_id from t_role_permission where role_id=#{roleId}
+    </select>
+    <select id="selectByCondition" parameterType="string" resultType="com.itheima.pojo.Role">
+        SELECT * FROM t_role
+        <if test="_parameter != null and _parameter.length >0 and _parameter != '' ">
+            where name=#{value} or keyword =#{value}
+        </if>
+    </select>
+</mapper>
